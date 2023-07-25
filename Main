@@ -1,0 +1,72 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ATM.
+       AUTHOR.     RENAN FRANCA.
+      *Managing a ATM program.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  ACCOUNT-NUMBER  PIC 9(5).
+       01  PIN-CODE        PIC 9(4).
+       01  COUNTER         PIC 9(1)        VALUE 0.
+       01  BA-CHOICE       PIC 9(20)V99    VALUE 100.
+
+       PROCEDURE DIVISION.
+       MAIN-ROUTINE.
+       DISPLAY "Welcome to the ATM!"
+           PERFORM INPUT-ACCOUNT-INFO.
+
+       INPUT-ACCOUNT-INFO.
+       DISPLAY "Inform the number of you Bank Account: "
+       ACCEPT ACCOUNT-NUMBER.
+       PERFORM TRY-3TIMES.
+       PERFORM DISPLAY-MENU.
+       
+      *  > Verify account. 3 times try. 
+       TRY-3TIMES.
+           ADD 1 TO  COUNTER
+               IF COUNTER <=2
+                   IF ACCOUNT-NUMBER = 0001
+                       DISPLAY "Welcome to your bank account!"
+                   ELSE
+                       DISPLAY "Invalid account number. "
+                       DISPLAY "Please, try again."
+                       PERFORM INPUT-ACCOUNT-INFO
+                   END-IF
+               ELSE
+                   DISPLAY "You have exceeded the maximum numbers "
+                   DISPLAY "of tries."
+               END-IF.
+
+       DISPLAY-MENU.
+           DISPLAY "ATM Menu:".
+           DISPLAY "1. Check Balance".
+           DISPLAY "2. Whithdraw Money".
+           DISPLAY "3. Deposit Money".
+           DISPLAY "4. Exit".
+           DISPLAY "Please enter your choice".
+           ACCEPT BA-CHOICE
+           PERFORM PROCESS-CHOICE.
+
+       EXIT-ATM.
+               DISPLAY "Thank you for using our services. Goodbye!"
+               STOP RUN.
+
+       PROCESS-CHOICE.
+           IF BA-CHOICE = 1
+               DISPLAY "Your balance is: ", BA-CHOICE
+               PERFORM DISPLAY-MENU             
+           ELSE IF BA-CHOICE = 2
+               DISPLAY "Withdraw option is out of service."
+               PERFORM DISPLAY-MENU         
+           ELSE IF BA-CHOICE = 3
+               DISPLAY "Deposit option is out of service."
+               PERFORM DISPLAY-MENU
+           ELSE IF BA-CHOICE = 4
+               PERFORM EXIT-ATM
+           ELSE
+               DISPLAY "Invalid option."
+           END-IF.
+
+           STOP RUN.
+
+       
