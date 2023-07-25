@@ -1,0 +1,79 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. ATM-PROGRAM.
+AUTHOR. RENAN FRANCA.
+
+DATA DIVISION.
+FILE SECTION.
+FD ACCOUNT-FILE.
+01 ACCOUNT-RECORD.
+   05 ACCOUNT-NUMBER     PIC X(10).
+   05 ACCOUNT-HOLDER-NAME PIC X(50).
+   05 ACCOUNT-BALANCE    PIC 9(10)V99.
+
+WORKING-STORAGE SECTION.
+01 ACC-NUMBER-INPUT      PIC X(10).
+01 BALANCE-AMOUNT        PIC 9(10)V99.
+01 ERROR-MESSAGE         PIC X(100).
+01 FOUND-FLAG            PIC X(1) VALUE 'N'.
+01 END-OF-FILE           PIC X(1) VALUE 'N'.
+
+PROCEDURE DIVISION.
+
+MAIN-PARAGRAPH.
+    OPEN INPUT ACCOUNT-FILE
+    DISPLAY "ATM PROGRAM"
+
+    PERFORM UNTIL END-OF-FILE = 'Y'
+        DISPLAY "Please enter your account number (or type 'EXIT' to quit): "
+        ACCEPT ACC-NUMBER-INPUT
+
+        IF ACC-NUMBER-INPUT = 'EXIT'
+            MOVE 'Y' TO END-OF-FILE
+        ELSE
+            PERFORM READ-ACCOUNT-FILE   -- Read account file to find the requested account
+            IF FOUND-FLAG = 'Y'        -- Check if the account was found
+                PERFORM DISPLAY-ACCOUNT-DETAILS   -- Display account details
+                PERFORM PERFORM-TRANSACTION      -- Perform a transaction on the account
+                PERFORM UPDATE-ACCOUNT-FILE       -- Update the account record after the transaction
+            ELSE
+                DISPLAY "Account not found. Please try again."
+            END-IF
+        END-IF
+    END-PERFORM.
+
+    CLOSE ACCOUNT-FILE
+    DISPLAY "Thank you for using our ATM program. Goodbye!"
+
+    STOP RUN.
+
+READ-ACCOUNT-FILE.
+    MOVE 'N' TO FOUND-FLAG
+    READ ACCOUNT-FILE
+        AT END
+            MOVE 'Y' TO END-OF-FILE   -- Set END-OF-FILE flag when there are no more records to read
+        NOT AT END
+            IF ACCOUNT-NUMBER = ACC-NUMBER-INPUT
+                MOVE 'Y' TO FOUND-FLAG   -- Account found, set FOUND-FLAG to 'Y'
+            END-IF
+    END-READ.
+
+DISPLAY-ACCOUNT-DETAILS.
+    DISPLAY "Account Number: " ACCOUNT-NUMBER
+    DISPLAY "Account Holder Name: " ACCOUNT-HOLDER-NAME
+    DISPLAY "Account Balance: " ACCOUNT-BALANCE.
+
+PERFORM-TRANSACTION.
+    DISPLAY "Available Balance: " ACCOUNT-BALANCE
+    DISPLAY "Enter the amount to withdraw: "
+    ACCEPT BALANCE-AMOUNT
+    IF BALANCE-AMOUNT > ACCOUNT-BALANCE
+        MOVE "Insufficient Balance" TO ERROR-MESSAGE   -- Set error message if the withdrawal amount exceeds the account balance
+        DISPLAY "Transaction Failed -" ERROR-MESSAGE
+    ELSE
+        SUBTRACT BALANCE-AMOUNT FROM ACCOUNT-BALANCE GIVING ACCOUNT-BALANCE   -- Perform the withdrawal transaction
+        DISPLAY "Transaction Successful. Remaining Balance: " ACCOUNT-BALANCE
+    END-IF.
+
+UPDATE-ACCOUNT-FILE.
+    REWRITE ACCOUNT-RECORD.   -- Update the account record after the transaction.
+
